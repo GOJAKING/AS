@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#1abc9c</color>
+    <color name="colorPrimaryDark">#16a085</color>
+    <color name="colorAccent">#004D40</color>
+    <color name="colorWhite">#ffffff</color>
+    <color name="colorBlack">#000000</color>
+    <color name="medium_dark_gray">#a8aeae</color>
+    <color name="strong_blue">#1a6196</color>
+    <color name="medium_gray">#a3adb4</color>
+    <color name="clear_gray">#e3e6e7</color>
+    <color name="light_gray">#d3d3d3</color>
+
+
+    <color name="event_color_01">#59dbe0</color>
+    <color name="event_color_02">#f57f68</color>
+    <color name="event_color_03">#87d288</color>
+    <color name="event_color_04">#f8b552</color>
+
+</resources>
+

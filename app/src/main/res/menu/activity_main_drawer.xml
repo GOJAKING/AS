@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_today"
+            android:icon="@drawable/ic_calender_today"
+            android:title="@string/today_schedule" />
+        <item
+            android:id="@+id/nav_three"
+            android:icon="@drawable/ic_calender_week"
+            android:title="@string/three_day_schedule" />
+
+        <item
+            android:id="@+id/nav_week"
+            android:icon="@drawable/ic_calender_week"
+            android:title="@string/week_schedule" />
+    </group>
+
+    <item android:title="Option">
+        <menu>
+            <item
+                android:id="@+id/nav_option"
+                android:icon="@drawable/ic_settings"
+                android:title="@string/option" />
+            <item
+                android:id="@+id/nav_logout"
+                android:icon="@drawable/ic_logout"
+                android:title="@string/logout" />
+        </menu>
+    </item>
+
+</menu>
