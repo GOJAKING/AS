@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -302,8 +303,33 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onEventClick(WeekViewEvent event, RectF eventRect) {
+        int dayInt = 0;
         Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
         intent.putExtra("id_ref", (int) event.getId());
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
+        intent.putExtra("start_time_class", timeFormatter.format( event.getStartTime().getTime()));
+        intent.putExtra("end_time_class", timeFormatter.format( event.getEndTime().getTime()));
+
+
+        String dayNumber = String.valueOf(event.getStartTime().getTime()).substring(0,3);
+        switch(dayNumber) {
+            case "Mon": dayInt = 1;
+                break;
+            case "Tue": dayInt = 2;
+                break;
+            case "Wed": dayInt = 3;
+                break;
+            case "Thu": dayInt = 4;
+                break;
+            case "Fri": dayInt = 5;
+                break;
+            case "Sat": dayInt = 6;
+                break;
+            case "Sun": dayInt = 7;
+                break;
+        }
+        intent.putExtra("day_class", dayInt+"");
+
         startActivity(intent);
 
         Toast.makeText(MainActivity.this, "Clicked " + event.getId(), Toast.LENGTH_SHORT).show();

@@ -48,12 +48,15 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
     private TextView startTimeTV;
     private TextView endTimeTV;
     private TextView reminderTV;
+    private EditText EditTextNote;
+
 
     private String title;
     private String date;
     private String startTime;
     private String endTime;
     private String reminder;
+    private String notes;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -66,6 +69,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         startTimeTV = (TextView) rootView.findViewById(R.id.start_time_text);
         endTimeTV = (TextView) rootView.findViewById(R.id.end_time_text);
         reminderTV = (TextView) rootView.findViewById(R.id.reminder_text);
+        EditTextNote = (EditText) rootView.findViewById(R.id.add_note_edit_text);
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
         Calendar current = Calendar.getInstance();
@@ -86,6 +90,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
                 startTime =  startTimeTV.getText().toString();
                 endTime = endTimeTV.getText().toString();
                 reminder = reminderTV.getText().toString();
+                notes = EditTextNote.getText().toString();
                 SavingInfo si = new SavingInfo();
                 si.execute();
             }
@@ -110,12 +115,13 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
             ob.put("StartTime", startTime);
             ob.put("EndTime", endTime);
             ob.put("Reminder", reminder);
+            ob.put("Note", notes);
             ParseQuery<ParseObject> query = new ParseQuery<ParseObject>(DatabaseTitle.TABLESCHEDULENAME);
             query.addDescendingOrder("idRef");
             try {
                 List<ParseObject> idLists = query.find();
                 if (idLists.isEmpty()) {
-                    ob.put("idRef", 0);
+                    ob.put("idRef", 10000);
                 } else {
                     String prevID = idLists.get(0).get("idRef").toString();
                     ob.put("idRef", (Integer.parseInt(prevID) + 1));

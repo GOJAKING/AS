@@ -5,4 +5,5 @@ package com.autstudent.autschedular.Helper;
  */
 public class DatabaseTitle {
     public static final String TABLESCHEDULENAME = "Schedule";
+    public static final String TABLECLASSNAME = "Class";
 }
