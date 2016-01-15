@@ -39,17 +39,11 @@ public class DetailsActivity extends AppCompatActivity {
         try {
             ParseQuery<ParseObject> query = new ParseQuery<ParseObject>(DatabaseTitle.TABLESCHEDULENAME);
             query.whereEqualTo("idRef", idRef);
-            //ob = query.;
             ob = query.find().get(0);
 
 
-            //Retrieving data primitives from object
-            String start = ob.getString("StartTime");
-            String finish = ob.getString("FinishTime");
-            String title = ob.getString("Title");
-            String dateNumberString = ob.getString("Date");
-            int reminderMin = ob.getInt("Reminder");
 
+            //Retrieving data primitives from object
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -66,7 +60,7 @@ public class DetailsActivity extends AppCompatActivity {
             StartTimeTv.setText(ob.getString("StartTime"));
 
             TextView EndTimeTv = (TextView) findViewById(R.id.end_time_text);
-            EndTimeTv.setText("");
+            EndTimeTv.setText(ob.getString("EndTime"));
 
             TextView ReminderTv = (TextView) findViewById(R.id.reminder_text);
             TextView NoteTv = (TextView) findViewById(R.id.detail_title);

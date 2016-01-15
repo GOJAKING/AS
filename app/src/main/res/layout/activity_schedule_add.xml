@@ -254,6 +254,7 @@
                             android:layout_height="wrap_content"
                             android:text=" min"
                             android:textSize="@dimen/font_edit_small" />
+
                     </LinearLayout>
                 </LinearLayout>
 
@@ -267,10 +268,18 @@
                     android:tint="@color/colorAccent" />
             </RelativeLayout>
 
+            <EditText
+                android:id="@+id/add_note_edit_text"
+                android:layout_marginTop="17dp"
+                android:layout_marginBottom="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:textSize="@dimen/font_edit_small"
+                android:hint="Add Note..."/>
+
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
                 android:id="@+id/save_button"
                 android:text="save"/>
 
