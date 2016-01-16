@@ -55,10 +55,6 @@ public class PaperDescription extends AppCompatActivity implements AdapterView.O
         ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("paper");
 
         try {
-            ProgressDialog pd = new ProgressDialog(this);
-            pd.setMessage("Loading papers");
-            pd.setCancelable(false);
-            pd.show();
             papers = query.find();
             ArrayList<String> ar = new ArrayList();
             for (ParseObject o : papers) {
@@ -69,7 +65,6 @@ public class PaperDescription extends AppCompatActivity implements AdapterView.O
             adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
             spinner.setAdapter(adapter);
             spinner.setOnItemSelectedListener(this);
-            pd.dismiss();
         } catch (ParseException e) {
             e.printStackTrace();
         }
@@ -85,14 +80,16 @@ public class PaperDescription extends AppCompatActivity implements AdapterView.O
     }
 
     private class DisplayPaperList extends AsyncTask<Integer,Void,Void>{
-        private ProgressDialog pd;
+        private View loadingView;
+        private View listView;
 
 
         @Override
         protected void onPreExecute() {
-            pd = new ProgressDialog(PaperDescription.this);
-            pd.setMessage("Loading Class");
-            pd.show();
+            loadingView = findViewById(R.id.loading_class);
+            loadingView.setVisibility(View.VISIBLE);
+            listView = findViewById(R.id.paper_stream_selector);
+            listView.setVisibility(View.GONE);
         }
 
         @Override
@@ -132,7 +129,8 @@ public class PaperDescription extends AppCompatActivity implements AdapterView.O
                     }
                 }
             });
-            pd.dismiss();
+            loadingView.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
         }
 
         private class SavingClass extends AsyncTask<ParseObject,Void,Void>{

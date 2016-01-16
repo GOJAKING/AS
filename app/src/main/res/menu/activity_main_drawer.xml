@@ -2,10 +2,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
     <group android:checkableBehavior="single">
+
         <item
-            android:id="@+id/nav_today"
+            android:id="@+id/nav_one"
             android:icon="@drawable/ic_calender_today"
-            android:title="@string/today_schedule" />
+            android:title="@string/one_schedule" />
         <item
             android:id="@+id/nav_three"
             android:icon="@drawable/ic_calender_week"

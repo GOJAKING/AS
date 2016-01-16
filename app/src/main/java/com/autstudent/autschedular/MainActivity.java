@@ -3,7 +3,9 @@ package com.autstudent.autschedular;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -21,6 +23,7 @@ import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.autstudent.autschedular.Helper.DatabaseTitle;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -49,6 +52,7 @@ public class MainActivity extends AppCompatActivity
     private int mWeekViewType = TYPE_THREE_DAY_VIEW;
     private WeekView mWeekView;
 
+    private ProgressDialog mProgressDialog;
 
     private int id;
 
@@ -109,7 +113,6 @@ public class MainActivity extends AppCompatActivity
         mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
         mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
         mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
-
     }
 
     @Override
@@ -118,7 +121,8 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+//            super.onBackPressed();
+            moveTaskToBack(true);
         }
     }
 
@@ -135,8 +139,6 @@ public class MainActivity extends AppCompatActivity
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         switch (id) {
             case R.id.add_activity:
                 Intent intent = new Intent(this, AddActivity.class);
@@ -150,12 +152,11 @@ public class MainActivity extends AppCompatActivity
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
-
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         int id = item.getItemId();
 
         switch (id) {
-            case R.id.nav_today:
-                mWeekView.goToToday();
+            case R.id.nav_one:
                 if (mWeekViewType != TYPE_DAY_VIEW) {
                     item.setChecked(!item.isChecked());
                     mWeekViewType = TYPE_DAY_VIEW;
@@ -207,8 +208,6 @@ public class MainActivity extends AppCompatActivity
                 finish();
                 break;
         }
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }
@@ -244,7 +243,12 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
+        // Populate the week view with some events.
+        List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
+        //current user
         ParseUser parseUser = ParseUser.getCurrentUser();
+
+        // getting the info from schedule
         ParseRelation<ParseObject> relation = parseUser.getRelation("Schedule");
         ParseQuery<ParseObject> query = relation.getQuery();
         List<ParseObject> schedule = new ArrayList<>();
@@ -254,9 +258,6 @@ public class MainActivity extends AppCompatActivity
             e.printStackTrace();
         }
 
-
-        // Populate the week view with some events.
-        List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
         for (ParseObject ob : schedule) {
             String[] start = ob.get("StartTime").toString().split(":");
             Calendar calendar = Calendar.getInstance();
@@ -293,8 +294,69 @@ public class MainActivity extends AppCompatActivity
             }
         }
 
+
+        // getting the info from class
+        ParseRelation<ParseObject> classRelation = parseUser.getRelation(DatabaseTitle.TABLESCLASSNAME);
+        ParseQuery<ParseObject> classQuery = classRelation.getQuery();
+        List<ParseObject> classes = new ArrayList<>();
+        try {
+            classes = classQuery.find();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        for (ParseObject ob : classes) {
+            ParseRelation<ParseObject> streamRelation = ob.getRelation(DatabaseTitle.TABLESSTREAMNAME);
+            ParseQuery<ParseObject> streamQuery = streamRelation.getQuery();
+            List<ParseObject> streams = new ArrayList<>();
+            try {
+                streams = streamQuery.find();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            for (ParseObject stream : streams) {
+                String[] start = stream.get("start").toString().split(":");
+                int day = Integer.parseInt(stream.get("day").toString());
+                ParseQuery<ParseObject>paperQuery = new ParseQuery<ParseObject>("paper");
+                paperQuery.whereEqualTo("objectId",ob.getParseObject("paper").getObjectId());
+                String title = "";
+                try {
+                    List<ParseObject> paper = paperQuery.find();
+                    title = paper.get(0).get("paper_title").toString();
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                int startHour = Integer.parseInt(start[0]);
+                int startMinute = Integer.parseInt(start[1]);
+                String[] end = stream.get("end").toString().split(":");
+                int endHour = Integer.parseInt(end[0]);
+                int endMinute =  Integer.parseInt(end[1]);
+                for(int i = 0; i<4 ;i++) {
+                    int id = Integer.parseInt(ob.get("ClassID").toString());
+                    Calendar startTime = Calendar.getInstance();
+                    startTime.set(Calendar.HOUR_OF_DAY,startHour );
+                    startTime.set(Calendar.MINUTE, startMinute);
+                    startTime.set(Calendar.DAY_OF_WEEK, day);
+                    startTime.set(Calendar.WEEK_OF_MONTH, i);
+                    startTime.set(Calendar.MONTH, newMonth);
+                    startTime.set(Calendar.YEAR, newYear);
+                    Calendar endTime = (Calendar) startTime.clone();
+                    endTime.set(Calendar.HOUR_OF_DAY, endHour);
+                    endTime.set(Calendar.MINUTE,endMinute);
+                    WeekViewEvent event = new WeekViewEvent(id, getEventTitle(startTime, title), startTime, endTime);
+                    int[] androidColors = getResources().getIntArray(R.array.androidcolors);
+                    int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                    event.setColor(randomAndroidColor);
+                    events.add(event);
+                }
+
+            }
+        }
+
         return events;
     }
+
 
     private String getEventTitle(Calendar time, String title) {
         return String.format(title + "\n%02d:%02d\n%s/%d", time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), time.get(Calendar.MONTH) + 1, time.get(Calendar.DAY_OF_MONTH));
@@ -318,9 +380,6 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onRestart() {
         super.onRestart();
-//        if(mWeekView!=null) {
-//            mWeekView.notifyDatasetChanged();
-//        }
     }
 }
 

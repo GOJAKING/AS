@@ -1,12 +1,9 @@
 package com.autstudent.autschedular;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -54,14 +51,16 @@ public class AddClass extends AddActivity.PlaceholderFragment implements View.On
 
     private class RefreshClassList extends AsyncTask<Void,Void,Void>{
 
-        private ProgressDialog pd;
+        private View loadingView;
+        private View listView;
         private List<ParseObject> objectLists;
 
         @Override
         protected void onPreExecute() {
-            pd = new ProgressDialog(getActivity());
-            pd.setMessage("Loading Class");
-            pd.show();
+            loadingView = rootView.findViewById(R.id.loading_class);
+            loadingView.setVisibility(View.VISIBLE);
+            listView = rootView.findViewById(R.id.add_class_list);
+            listView.setVisibility(View.GONE);
         }
 
         @Override
@@ -84,7 +83,8 @@ public class AddClass extends AddActivity.PlaceholderFragment implements View.On
             ListView ls = (ListView) getActivity().findViewById(R.id.add_class_list);
             StreamArrayAdapter streamArrayAdapter = new StreamArrayAdapter(getActivity(), R.layout.custom_paper_row_layout, objectLists);
             ls.setAdapter(streamArrayAdapter);
-            pd.dismiss();
+            loadingView.setVisibility(View.GONE);
+            listView.setVisibility(View.VISIBLE);
         }
     }
 }

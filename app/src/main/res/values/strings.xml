@@ -5,7 +5,8 @@
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-    <string name="today_schedule">Today\'s Schedule</string>
+    <string name="go_to_today">Go To Today</string>
+    <string name="one_schedule">One day\'s Schedule</string>
     <string name="week_schedule">Week\'s Schedule</string>
     <string name="option">Option</string>
     <string name="logout">Logout</string>
