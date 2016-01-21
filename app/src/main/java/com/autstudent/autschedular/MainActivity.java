@@ -3,6 +3,7 @@ package com.autstudent.autschedular;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.RectF;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -50,6 +51,9 @@ public class MainActivity extends AppCompatActivity
     private int mWeekViewType = TYPE_THREE_DAY_VIEW;
     private WeekView mWeekView;
 
+    private List<WeekViewEvent>events;
+
+    private ProgressDialog mProgressDialog;
 
     private int id;
 
@@ -77,6 +81,12 @@ public class MainActivity extends AppCompatActivity
         userNameTV.setText(currentUser.get("display_name").toString());
         TextView emailAddressTV = (TextView) header.findViewById(R.id.email_drawer);
         emailAddressTV.setText(currentUser.getEmail());
+
+        //list of events
+        events = new ArrayList<>();
+        GetCalendarResources gt = new GetCalendarResources();
+        gt.execute();
+
         // Get a reference for the week view in the layout.
         mWeekView = (WeekView) findViewById(R.id.weekView);
 
@@ -245,37 +255,132 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
-        ParseUser parseUser = ParseUser.getCurrentUser();
-        ParseRelation<ParseObject> relation = parseUser.getRelation("Schedule");
-        ParseQuery<ParseObject> query = relation.getQuery();
-        List<ParseObject> schedule = new ArrayList<>();
-        try {
-            schedule = query.find();
-        } catch (ParseException e) {
-            e.printStackTrace();
+        List<WeekViewEvent> events = new ArrayList<>();
+        for(WeekViewEvent we : this.events){
+            if(checkEvent(we,newYear,newMonth)){
+                events.add(we);
+            }
+        }
+        return events;
+    }
+
+    private boolean checkEvent(WeekViewEvent event,int newYear, int newMonth){
+        return (event.getStartTime().get(Calendar.MONTH)==newMonth-1) && (event.getStartTime().get(Calendar.YEAR)==newYear)
+                && (event.getEndTime().get(Calendar.MONTH)==newMonth-1) && (event.getEndTime().get(Calendar.YEAR)==newYear);
+    }
+
+    private String getEventTitle(Calendar time, String title) {
+        return String.format(title + "\n%02d:%02d\n%s/%d", time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), time.get(Calendar.MONTH) + 1, time.get(Calendar.DAY_OF_MONTH));
+    }
+
+    @Override
+    public void onEventClick(WeekViewEvent event, RectF eventRect) {
+        int dayInt = 0;
+        Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
+        intent.putExtra("id_ref", (int) event.getId());
+        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
+        intent.putExtra("start_time_class", timeFormatter.format(event.getStartTime().getTime()));
+        intent.putExtra("end_time_class", timeFormatter.format(event.getEndTime().getTime()));
+
+
+        String dayNumber = String.valueOf(event.getStartTime().getTime()).substring(0, 3);
+        switch (dayNumber) {
+            case "Mon":
+                dayInt = 1;
+                break;
+            case "Tue":
+                dayInt = 2;
+                break;
+            case "Wed":
+                dayInt = 3;
+                break;
+            case "Thu":
+                dayInt = 4;
+                break;
+            case "Fri":
+                dayInt = 5;
+                break;
+            case "Sat":
+                dayInt = 6;
+                break;
+            case "Sun":
+                dayInt = 7;
+                break;
+        }
+        intent.putExtra("day_class", dayInt + "");
+
+        startActivity(intent);
+
+        Toast.makeText(MainActivity.this, "Clicked " + event.getId(), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onEventLongPress(WeekViewEvent event, RectF eventRect) {
+        Toast.makeText(MainActivity.this, "Long pressed event: " + event.getName(), Toast.LENGTH_SHORT).show();
+    }
+
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+    }
+
+    private void showProgressDialog() {
+        if (mProgressDialog == null) {
+            mProgressDialog = new ProgressDialog(this);
+            mProgressDialog.setMessage("Loading");
+            mProgressDialog.setIndeterminate(true);
         }
 
+        mProgressDialog.show();
+    }
 
-        // Populate the week view with some events.
-        List<WeekViewEvent> events = new ArrayList<WeekViewEvent>();
-        for (ParseObject ob : schedule) {
-            String[] start = ob.get("StartTime").toString().split(":");
-            Calendar calendar = Calendar.getInstance();
+    private void hideProgressDialog() {
+        if (mProgressDialog != null && mProgressDialog.isShowing()) {
+            mProgressDialog.hide();
+        }
+    }
+
+
+    private class GetCalendarResources extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showProgressDialog();
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            ParseUser parseUser = ParseUser.getCurrentUser();
+            ParseRelation<ParseObject> relation = parseUser.getRelation("Schedule");
+            ParseQuery<ParseObject> query = relation.getQuery();
+            List<ParseObject> schedule = new ArrayList<>();
             try {
-                SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
-                Date date = format.parse(ob.get("Date").toString());
-                calendar.setTime(date);
-            } catch (Exception e) {
+                schedule = query.find();
+            } catch (ParseException e) {
                 e.printStackTrace();
             }
 
 
-            int month = calendar.get(Calendar.MONTH);
-            int year = calendar.get(Calendar.YEAR);
-            String title = ob.get("Title").toString();
-            int id = Integer.parseInt(ob.get("idRef").toString());
+            // Populate the week view with some events.
+            for (ParseObject ob : schedule) {
+                String[] start = ob.get("StartTime").toString().split(":");
+                Calendar calendar = Calendar.getInstance();
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+                    Date date = format.parse(ob.get("Date").toString());
+                    calendar.setTime(date);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
 
-            if (newMonth - 1 == month && newYear == year) {
+
+                int month = calendar.get(Calendar.MONTH);
+                int year = calendar.get(Calendar.YEAR);
+                String title = ob.get("Title").toString();
+                int id = Integer.parseInt(ob.get("idRef").toString());
+
                 Calendar startTime = Calendar.getInstance();
                 startTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(start[0]));
                 startTime.set(Calendar.MINUTE, Integer.parseInt(start[1]));
@@ -292,58 +397,15 @@ public class MainActivity extends AppCompatActivity
                 event.setColor(randomAndroidColor);
                 events.add(event);
             }
+            return null;
         }
 
-        return events;
-    }
-
-    private String getEventTitle(Calendar time, String title) {
-        return String.format(title + "\n%02d:%02d\n%s/%d", time.get(Calendar.HOUR_OF_DAY), time.get(Calendar.MINUTE), time.get(Calendar.MONTH) + 1, time.get(Calendar.DAY_OF_MONTH));
-    }
-
-    @Override
-    public void onEventClick(WeekViewEvent event, RectF eventRect) {
-        int dayInt = 0;
-        Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
-        intent.putExtra("id_ref", (int) event.getId());
-        SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
-        intent.putExtra("start_time_class", timeFormatter.format( event.getStartTime().getTime()));
-        intent.putExtra("end_time_class", timeFormatter.format( event.getEndTime().getTime()));
-
-
-        String dayNumber = String.valueOf(event.getStartTime().getTime()).substring(0,3);
-        switch(dayNumber) {
-            case "Mon": dayInt = 1;
-                break;
-            case "Tue": dayInt = 2;
-                break;
-            case "Wed": dayInt = 3;
-                break;
-            case "Thu": dayInt = 4;
-                break;
-            case "Fri": dayInt = 5;
-                break;
-            case "Sat": dayInt = 6;
-                break;
-            case "Sun": dayInt = 7;
-                break;
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            mWeekView.notifyDatasetChanged();
+            hideProgressDialog();
         }
-        intent.putExtra("day_class", dayInt+"");
-
-        startActivity(intent);
-
-        Toast.makeText(MainActivity.this, "Clicked " + event.getId(), Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onEventLongPress(WeekViewEvent event, RectF eventRect) {
-        Toast.makeText(MainActivity.this, "Long pressed event: " + event.getName(), Toast.LENGTH_SHORT).show();
-    }
-
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
     }
 }
 
