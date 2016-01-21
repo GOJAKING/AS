@@ -24,8 +24,7 @@
             android:configChanges="keyboardHidden|orientation"
             android:label="@string/app_name"
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar">
-        </activity>
+            android:theme="@style/AppTheme.NoActionBar"></activity>
         <activity
             android:name=".Login"
             android:label="Login"
@@ -60,6 +59,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="com.autstudent.autschedular.AddActivity" />
         </activity>
+        <activity
+            android:name=".optionsActivity"
+            android:label="@string/title_activity_options"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
