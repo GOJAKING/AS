@@ -85,14 +85,15 @@ public class PaperDescription extends AppCompatActivity implements AdapterView.O
     }
 
     private class DisplayPaperList extends AsyncTask<Integer,Void,Void>{
-        private ProgressDialog pd;
-
+        private View progress;
+        private View list;
 
         @Override
         protected void onPreExecute() {
-            pd = new ProgressDialog(PaperDescription.this);
-            pd.setMessage("Loading Class");
-            pd.show();
+            progress = findViewById(R.id.progress_layout);
+            progress.setVisibility(View.VISIBLE);
+            list = findViewById(R.id.paper_stream_selector);
+            list.setVisibility(View.GONE);
         }
 
         @Override
@@ -132,7 +133,8 @@ public class PaperDescription extends AppCompatActivity implements AdapterView.O
                     }
                 }
             });
-            pd.dismiss();
+            progress.setVisibility(View.GONE);
+            list.setVisibility(View.VISIBLE);
         }
 
         private class SavingClass extends AsyncTask<ParseObject,Void,Void>{
