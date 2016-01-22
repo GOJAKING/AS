@@ -23,6 +23,7 @@ import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -257,6 +258,7 @@ public class MainActivity extends AppCompatActivity
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
         List<WeekViewEvent> events = new ArrayList<>();
         for(WeekViewEvent we : this.events){
+            //if(we.getId()>10000)
             if(checkEvent(we,newYear,newMonth)){
                 events.add(we);
             }
@@ -353,8 +355,8 @@ public class MainActivity extends AppCompatActivity
         @Override
         protected Void doInBackground(Void... voids) {
             ParseUser parseUser = ParseUser.getCurrentUser();
-            ParseRelation<ParseObject> relation = parseUser.getRelation("Schedule");
-            ParseQuery<ParseObject> query = relation.getQuery();
+            ParseRelation<ParseObject> scheduleRelation = parseUser.getRelation("Schedule");
+            ParseQuery<ParseObject> query = scheduleRelation.getQuery();
             List<ParseObject> schedule = new ArrayList<>();
             try {
                 schedule = query.find();
@@ -374,7 +376,6 @@ public class MainActivity extends AppCompatActivity
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
 
                 int month = calendar.get(Calendar.MONTH);
                 int year = calendar.get(Calendar.YEAR);
@@ -396,6 +397,77 @@ public class MainActivity extends AppCompatActivity
                 int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
                 event.setColor(randomAndroidColor);
                 events.add(event);
+            }
+
+            ParseRelation<ParseObject> classelation = parseUser.getRelation("Class");
+            ParseQuery<ParseObject> classquery = classelation.getQuery();
+            List<ParseObject> classes = new ArrayList<>();
+            try {
+                classes =classquery.find();
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+
+            for(ParseObject ob : classes){
+                String title = "";
+                ParseQuery <ParseObject> paperQuery = new ParseQuery<ParseObject>("paper");
+                paperQuery.whereEqualTo("objectId",ob.getParseObject("paper").getObjectId());
+                try{
+                    title = paperQuery.find().get(0).get("paper_title").toString();
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                ParseRelation <ParseObject> streamRelation = ob.getRelation("stream");
+                ParseQuery streamQuery = streamRelation.getQuery();
+                List<ParseObject>streams = new ArrayList<>();
+                try{
+                    streams = streamQuery.find();
+                }
+                catch (Exception e){
+                    e.printStackTrace();
+                }
+                int [] sem1 = new int[]{0,1,2,3,4,5,6,7,8,9,10,11};
+                if(Integer.parseInt(ob.get("semester").toString())==1){
+                    sem1 = new int[]{0,1,2,3,4,5};
+                }
+                else{
+                    sem1 = new int[]{6,7,8,9,10,11};
+                }
+                for(ParseObject stream : streams){
+                    for(int month : sem1) {
+                        int week = 1;
+                        Calendar time = Calendar.getInstance();
+                        time.set(Calendar.MONTH, month);
+                        time.set(Calendar.YEAR, Integer.parseInt(ob.get("year").toString()));
+                        time.set(Calendar.DAY_OF_MONTH,1);
+                        int day = time.getTime().getDay();
+                        // if it is not monday or sunday or saturday make it week 2 or else overlap between week 1 and week 5 of the month
+                        if(!(day == 1 || day == 0 || day ==6)){
+                            week = 2;
+                        }
+                        for(; week < 6; ++week) {
+                            String[] start = stream.get("start").toString().split(":");
+                            int id = Integer.parseInt(ob.get("ClassID").toString());
+                            Calendar startTime = Calendar.getInstance();
+                            startTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(start[0]));
+                            startTime.set(Calendar.MINUTE, Integer.parseInt(start[1]));
+                            startTime.set(Calendar.MONTH, month);
+                            startTime.set(Calendar.YEAR, Integer.parseInt(ob.get("year").toString()));
+                            startTime.set(Calendar.DAY_OF_WEEK, Integer.parseInt(stream.get("day").toString()));
+                            startTime.set(Calendar.WEEK_OF_MONTH,week);
+                            String[] end = stream.get("end").toString().split(":");
+                            Calendar endTime = (Calendar) startTime.clone();
+                            endTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(end[0]));
+                            endTime.set(Calendar.MINUTE, Integer.parseInt(end[1]));
+                            WeekViewEvent event = new WeekViewEvent(id, getEventTitle(startTime, title), startTime, endTime);
+                            int[] androidColors = getResources().getIntArray(R.array.androidcolors);
+                            int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
+                            event.setColor(randomAndroidColor);
+                            events.add(event);
+                        }
+                    }
+                }
             }
             return null;
         }

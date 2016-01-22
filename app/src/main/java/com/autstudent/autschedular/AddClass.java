@@ -23,26 +23,14 @@ import java.util.List;
 /**
  * Created by wilzo on 11/01/2016.
  */
-public class AddClass extends AddActivity.PlaceholderFragment implements View.OnClickListener{
+public class AddClass extends AddActivity.PlaceholderFragment{
 
     private View rootView;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_class_add,container,false);
         this.rootView = rootView;
-        Button add = (Button)rootView.findViewById(R.id.add_class_button);
-        add.setOnClickListener(this);
         return rootView;
-    }
-
-    @Override
-    public void onClick(View v) {
-        switch (v.getId()){
-            case R.id.add_class_button:
-                Intent intent = new Intent(getActivity(),PaperDescription.class);
-                startActivity(intent);
-                break;
-        }
     }
 
     @Override
@@ -54,14 +42,16 @@ public class AddClass extends AddActivity.PlaceholderFragment implements View.On
 
     private class RefreshClassList extends AsyncTask<Void,Void,Void>{
 
-        private ProgressDialog pd;
+        private View progress;
+        private View list;
         private List<ParseObject> objectLists;
 
         @Override
         protected void onPreExecute() {
-            pd = new ProgressDialog(getActivity());
-            pd.setMessage("Loading Class");
-            pd.show();
+            progress = rootView.findViewById(R.id.progress_layout);
+            progress.setVisibility(View.VISIBLE);
+            list = rootView.findViewById(R.id.add_class_list);
+            list.setVisibility(View.GONE);
         }
 
         @Override
@@ -84,7 +74,8 @@ public class AddClass extends AddActivity.PlaceholderFragment implements View.On
             ListView ls = (ListView) getActivity().findViewById(R.id.add_class_list);
             StreamArrayAdapter streamArrayAdapter = new StreamArrayAdapter(getActivity(), R.layout.custom_paper_row_layout, objectLists);
             ls.setAdapter(streamArrayAdapter);
-            pd.dismiss();
+            progress.setVisibility(View.GONE);
+            list.setVisibility(View.VISIBLE);
         }
     }
 }

@@ -1,8 +1,10 @@
 package com.autstudent.autschedular;
 
+import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -36,6 +38,7 @@ public class AddActivity extends AppCompatActivity {
      * The {@link ViewPager} that will host the section contents.
      */
     private ViewPager mViewPager;
+    private Menu menu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +66,12 @@ public class AddActivity extends AppCompatActivity {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
+                if(tab.getPosition()==0){
+                    menu.findItem(R.id.add_activity).setVisible(false);
+                }
+                else{
+                    menu.findItem(R.id.add_activity).setVisible(true);
+                }
             }
 
             @Override
@@ -86,10 +95,22 @@ public class AddActivity extends AppCompatActivity {
                 onBackPressed();
                 finish();
                 return true;
+            case R.id.add_activity:
+                Intent intent = new Intent(AddActivity.this,PaperDescription.class);
+                startActivity(intent);
+                break;
         }
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.main, menu);
+        this.menu = menu;
+        menu.findItem(R.id.add_activity).setVisible(false);
+        return true;
+    }
 
 
     /**

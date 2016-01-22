@@ -3,15 +3,24 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <Button
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Add Class"
-        android:id="@+id/add_class_button"
-        android:layout_gravity="center_horizontal" />
+        android:id="@+id/progress_layout"
+        android:visibility="gone">
+        <ProgressBar
+            android:id="@+id/progressBar1"
+            style="?android:attr/progressBarStyleLarge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true" />
+    </RelativeLayout>
 
     <ListView
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/add_class_list"/>
+        android:layout_height="wrap_content"
+        android:id="@+id/add_class_list"
+        android:visibility="visible"
+        android:layout_margin="10dp"
+        android:isScrollContainer="false"/>
 </LinearLayout>
