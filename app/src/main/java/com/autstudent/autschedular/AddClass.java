@@ -54,14 +54,16 @@ public class AddClass extends AddActivity.PlaceholderFragment implements View.On
 
     private class RefreshClassList extends AsyncTask<Void,Void,Void>{
 
-        private ProgressDialog pd;
+        private View progress;
+        private View list;
         private List<ParseObject> objectLists;
 
         @Override
         protected void onPreExecute() {
-            pd = new ProgressDialog(getActivity());
-            pd.setMessage("Loading Class");
-            pd.show();
+            progress = rootView.findViewById(R.id.progress_layout);
+            progress.setVisibility(View.VISIBLE);
+            list = rootView.findViewById(R.id.add_class_list);
+            list.setVisibility(View.GONE);
         }
 
         @Override
@@ -84,7 +86,8 @@ public class AddClass extends AddActivity.PlaceholderFragment implements View.On
             ListView ls = (ListView) getActivity().findViewById(R.id.add_class_list);
             StreamArrayAdapter streamArrayAdapter = new StreamArrayAdapter(getActivity(), R.layout.custom_paper_row_layout, objectLists);
             ls.setAdapter(streamArrayAdapter);
-            pd.dismiss();
+            progress.setVisibility(View.GONE);
+            list.setVisibility(View.VISIBLE);
         }
     }
 }
