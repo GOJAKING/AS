@@ -102,7 +102,6 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         private ProgressDialog pd;
         @Override
         protected void onPreExecute() {
-            Log.i("Hello","there");
             pd = ProgressDialog.show(getActivity(), "",
                     "Saving", true);
         }
@@ -146,11 +145,11 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
     }
 
     public void onClickController(View rootView) {
-        ImageButton editTitle = (ImageButton) rootView.findViewById(R.id.edit_title);
-        ImageButton editDate = (ImageButton) rootView.findViewById(R.id.edit_date);
-        ImageButton editStartTime = (ImageButton) rootView.findViewById(R.id.edit_start_time);
-        ImageButton editEndTime = (ImageButton) rootView.findViewById(R.id.edit_end_time);
-        ImageButton editReminder = (ImageButton) rootView.findViewById(R.id.edit_reminder);
+        TextView editTitle = (TextView) rootView.findViewById(R.id.title_text);
+        TextView editDate = (TextView) rootView.findViewById(R.id.date_text);
+        TextView editStartTime = (TextView) rootView.findViewById(R.id.start_time_text);
+        TextView editEndTime = (TextView) rootView.findViewById(R.id.end_time_text);
+        TextView editReminder = (TextView) rootView.findViewById(R.id.reminder_text);
 
         setOnClickTitleEditor(editTitle);
         setOnClickDatePicker(editDate);
@@ -158,7 +157,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         setOnClickReminderPicker(editReminder, rootView);
     }
 
-    public void setOnClickDatePicker(ImageButton editDate) {
+    public void setOnClickDatePicker(TextView editDate) {
         editDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,7 +178,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         });
     }
 
-    public void setOnClickTitleEditor(ImageButton editTitle) {
+    public void setOnClickTitleEditor(TextView editTitle) {
         editTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -213,7 +212,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         });
     }
 
-    public void setOnClickTimePickerEditor(ImageButton editStartTime, ImageButton editEndTime) {
+    public void setOnClickTimePickerEditor(TextView editStartTime, final TextView editEndTime) {
         editStartTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -233,6 +232,11 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
                             selectedMinuteString = "0" + selectedMinuteString;
                         }
                         startTimeTV.setText(selectedHourString + ":" + selectedMinuteString);
+                        String endSelectedHourString = (selectedHour+1) + "";
+                        if (endSelectedHourString.length() == 1) {
+                            endSelectedHourString = "0" + endSelectedHourString;
+                        }
+                        endTimeTV.setText(endSelectedHourString + ":" + selectedMinuteString);
                     }
                 }, hour, minute, false);//Yes 24 hour time
                 mTimePicker.setTitle("Select Time");
@@ -266,7 +270,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         });
     }
 
-    public void setOnClickReminderPicker(ImageButton editReminder, View view) {
+    public void setOnClickReminderPicker(TextView editReminder, View view) {
         editReminder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

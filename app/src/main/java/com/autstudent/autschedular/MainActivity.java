@@ -1,6 +1,8 @@
 package com.autstudent.autschedular;
 
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.RectF;
 import android.os.AsyncTask;
@@ -23,6 +25,7 @@ import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.autstudent.autschedular.Helper.DatabaseTitle;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
@@ -52,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private int mWeekViewType = TYPE_THREE_DAY_VIEW;
     private WeekView mWeekView;
 
-    private List<WeekViewEvent>events;
+    private List<WeekViewEvent> events;
 
     private ProgressDialog mProgressDialog;
 
@@ -237,11 +240,8 @@ public class MainActivity extends AppCompatActivity
             public String interpretDate(Calendar date) {
                 SimpleDateFormat weekdayNameFormat = new SimpleDateFormat("EEE", Locale.getDefault());
                 String weekday = weekdayNameFormat.format(date.getTime());
-                SimpleDateFormat format = new SimpleDateFormat(" M/d", Locale.getDefault());
+                SimpleDateFormat format = new SimpleDateFormat(" d/M", Locale.getDefault());
 
-                // All android api level do not have a standard way of getting the first letter of
-                // the week day name. Hence we get the first char programmatically.
-                // Details: http://stackoverflow.com/questions/16959502/get-one-letter-abbreviation-of-week-day-of-a-date-in-java#answer-16959657
                 if (shortDate)
                     weekday = String.valueOf(weekday.charAt(0));
                 return weekday.toUpperCase() + format.format(date.getTime());
@@ -249,7 +249,9 @@ public class MainActivity extends AppCompatActivity
 
             @Override
             public String interpretTime(int hour) {
-                return hour > 11 ? (hour - 12) + " PM" : (hour == 0 ? "12 AM" : hour + " AM");
+                if (hour == 24) hour = 0;
+                if (hour == 0) hour = 0;
+                return hour + ":00";
             }
         });
     }
@@ -257,18 +259,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
         List<WeekViewEvent> events = new ArrayList<>();
-        for(WeekViewEvent we : this.events){
+        for (WeekViewEvent we : this.events) {
             //if(we.getId()>10000)
-            if(checkEvent(we,newYear,newMonth)){
+            if (checkEvent(we, newYear, newMonth)) {
                 events.add(we);
             }
         }
         return events;
     }
 
-    private boolean checkEvent(WeekViewEvent event,int newYear, int newMonth){
-        return (event.getStartTime().get(Calendar.MONTH)==newMonth-1) && (event.getStartTime().get(Calendar.YEAR)==newYear)
-                && (event.getEndTime().get(Calendar.MONTH)==newMonth-1) && (event.getEndTime().get(Calendar.YEAR)==newYear);
+    private boolean checkEvent(WeekViewEvent event, int newYear, int newMonth) {
+        return (event.getStartTime().get(Calendar.MONTH) == newMonth - 1) && (event.getStartTime().get(Calendar.YEAR) == newYear)
+                && (event.getEndTime().get(Calendar.MONTH) == newMonth - 1) && (event.getEndTime().get(Calendar.YEAR) == newYear);
     }
 
     private String getEventTitle(Calendar time, String title) {
@@ -317,8 +319,52 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onEventLongPress(WeekViewEvent event, RectF eventRect) {
-        Toast.makeText(MainActivity.this, "Long pressed event: " + event.getName(), Toast.LENGTH_SHORT).show();
+    public void onEventLongPress(final WeekViewEvent event, RectF eventRect) {
+        final WeekViewEvent deleteEvent = event;
+        final String items[] = {"Delete", "Cancel"};
+        AlertDialog.Builder ab = new AlertDialog.Builder(MainActivity.this);
+        ab.setTitle("Options");
+        ab.setItems(items, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface d, int choice) {
+                if (choice == 0) {
+                    ParseUser user = ParseUser.getCurrentUser();
+                    if (event.getId() < 10000) {
+                        try {
+                            ParseRelation<ParseObject> classRelation = user.getRelation("Class");
+                            ParseQuery<ParseObject> query = classRelation.getQuery();
+                            query.whereEqualTo("ClassID", event.getId() + "");
+                            ParseObject ob = query.find().get(0);
+                            classRelation.remove(ob);
+                            user.save();
+                            events = new ArrayList<>();
+                            GetCalendarResources gt = new GetCalendarResources();
+                            gt.execute();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            ParseRelation<ParseObject> classRelation = user.getRelation("Schedule");
+                            ParseQuery<ParseObject> query = classRelation.getQuery();
+                            Log.i("id", event.getId() + "");
+                            query.whereEqualTo("idRef", event.getId());
+                            List<ParseObject> list = query.find();
+                            Log.i("size", list.size() + "");
+                            ParseObject ob = list.get(0);
+                            classRelation.remove(ob);
+                            user.save();
+                            ob.delete();
+                            events = new ArrayList<>();
+                            GetCalendarResources gt = new GetCalendarResources();
+                            gt.execute();
+                        } catch (ParseException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
+            }
+        });
+        ab.show();
     }
 
 
@@ -403,50 +449,47 @@ public class MainActivity extends AppCompatActivity
             ParseQuery<ParseObject> classquery = classelation.getQuery();
             List<ParseObject> classes = new ArrayList<>();
             try {
-                classes =classquery.find();
+                classes = classquery.find();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
 
-            for(ParseObject ob : classes){
+            for (ParseObject ob : classes) {
                 String title = "";
-                ParseQuery <ParseObject> paperQuery = new ParseQuery<ParseObject>("paper");
-                paperQuery.whereEqualTo("objectId",ob.getParseObject("paper").getObjectId());
-                try{
+                ParseQuery<ParseObject> paperQuery = new ParseQuery<ParseObject>("paper");
+                paperQuery.whereEqualTo("objectId", ob.getParseObject("paper").getObjectId());
+                try {
                     title = paperQuery.find().get(0).get("paper_title").toString();
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                ParseRelation <ParseObject> streamRelation = ob.getRelation("stream");
+                ParseRelation<ParseObject> streamRelation = ob.getRelation("stream");
                 ParseQuery streamQuery = streamRelation.getQuery();
-                List<ParseObject>streams = new ArrayList<>();
-                try{
+                List<ParseObject> streams = new ArrayList<>();
+                try {
                     streams = streamQuery.find();
-                }
-                catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-                int [] sem1 = new int[]{0,1,2,3,4,5,6,7,8,9,10,11};
-                if(Integer.parseInt(ob.get("semester").toString())==1){
-                    sem1 = new int[]{0,1,2,3,4,5};
+                int[] sem1 = new int[]{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
+                if (Integer.parseInt(ob.get("semester").toString()) == 1) {
+                    sem1 = new int[]{0, 1, 2, 3, 4, 5};
+                } else {
+                    sem1 = new int[]{6, 7, 8, 9, 10, 11};
                 }
-                else{
-                    sem1 = new int[]{6,7,8,9,10,11};
-                }
-                for(ParseObject stream : streams){
-                    for(int month : sem1) {
+                for (ParseObject stream : streams) {
+                    for (int month : sem1) {
                         int week = 1;
                         Calendar time = Calendar.getInstance();
                         time.set(Calendar.MONTH, month);
                         time.set(Calendar.YEAR, Integer.parseInt(ob.get("year").toString()));
-                        time.set(Calendar.DAY_OF_MONTH,1);
+                        time.set(Calendar.DAY_OF_MONTH, 1);
                         int day = time.getTime().getDay();
                         // if it is not monday or sunday or saturday make it week 2 or else overlap between week 1 and week 5 of the month
-                        if(!(day == 1 || day == 0 || day ==6)){
+                        if (!(day == 1 || day == 0 || day == 6)) {
                             week = 2;
                         }
-                        for(; week < 6; ++week) {
+                        for (; week < 6; ++week) {
                             String[] start = stream.get("start").toString().split(":");
                             int id = Integer.parseInt(ob.get("ClassID").toString());
                             Calendar startTime = Calendar.getInstance();
@@ -455,7 +498,7 @@ public class MainActivity extends AppCompatActivity
                             startTime.set(Calendar.MONTH, month);
                             startTime.set(Calendar.YEAR, Integer.parseInt(ob.get("year").toString()));
                             startTime.set(Calendar.DAY_OF_WEEK, Integer.parseInt(stream.get("day").toString()));
-                            startTime.set(Calendar.WEEK_OF_MONTH,week);
+                            startTime.set(Calendar.WEEK_OF_MONTH, week);
                             String[] end = stream.get("end").toString().split(":");
                             Calendar endTime = (Calendar) startTime.clone();
                             endTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(end[0]));

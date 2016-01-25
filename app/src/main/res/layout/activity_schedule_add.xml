@@ -55,14 +55,6 @@
                         android:textSize="@dimen/font_edit_small" />
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/edit_title"
-                    android:layout_width="@dimen/icon_edit_small"
-                    android:layout_height="@dimen/icon_edit_small"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_action_pencil"
-                    android:tint="@color/colorAccent" />
             </RelativeLayout>
 
             <View
@@ -103,14 +95,6 @@
                         android:textSize="@dimen/font_edit_small" />
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/edit_date"
-                    android:layout_width="@dimen/icon_edit_small"
-                    android:layout_height="@dimen/icon_edit_small"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_action_pencil"
-                    android:tint="@color/colorAccent" />
             </RelativeLayout>
 
             <View
@@ -163,14 +147,6 @@
                             android:text="@string/start_time"
                             android:textSize="@dimen/font_edit_small" />
 
-                        <ImageButton
-                            android:id="@+id/edit_start_time"
-                            android:layout_width="@dimen/icon_edit_small"
-                            android:layout_height="@dimen/icon_edit_small"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginTop="5dp"
-                            android:src="@drawable/ic_action_pencil"
-                            android:tint="@color/colorAccent" />
                     </RelativeLayout>
 
                     <RelativeLayout
@@ -193,14 +169,6 @@
                             android:text="@string/end_time"
                             android:textSize="@dimen/font_edit_small" />
 
-                        <ImageButton
-                            android:id="@+id/edit_end_time"
-                            android:layout_width="@dimen/icon_edit_small"
-                            android:layout_height="@dimen/icon_edit_small"
-                            android:layout_alignParentEnd="true"
-                            android:layout_marginTop="5dp"
-                            android:src="@drawable/ic_action_pencil"
-                            android:tint="@color/colorAccent" />
                     </RelativeLayout>
                 </LinearLayout>
 
@@ -258,14 +226,6 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <ImageButton
-                    android:id="@+id/edit_reminder"
-                    android:layout_width="@dimen/icon_edit_small"
-                    android:layout_height="@dimen/icon_edit_small"
-                    android:layout_alignParentEnd="true"
-                    android:layout_marginTop="5dp"
-                    android:src="@drawable/ic_action_pencil"
-                    android:tint="@color/colorAccent" />
             </RelativeLayout>
 
             <EditText

@@ -58,10 +58,6 @@
 
         </android.support.design.widget.AppBarLayout>
 
-        <FrameLayout
-            android:id="@+id/details_frame"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -318,8 +314,6 @@
 
                 </LinearLayout>
             </RelativeLayout>
-
-        </FrameLayout>
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton

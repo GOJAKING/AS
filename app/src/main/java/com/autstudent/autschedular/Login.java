@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -60,40 +61,48 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
         signInButton.setScopes(gso.getScopeArray());
         Intent intent = getIntent();
         String message = intent.getStringExtra("message");
-        if (message != null)
+        if (message != null) {
+            Log.i("logout", message);
             switch (message) {
                 case "logout":
                     mustSignOut = true;
                     break;
             }
         }
+    }
 
 
     public void onStart() {
         super.onStart();
-        OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-        if (opr.isDone()) {
-            // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
-            // and the GoogleSignInResult will be available instantly.
-            Log.d(TAG, "Got cached sign-in");
-            GoogleSignInResult result = opr.get();
-            handleSignInResult(result);
-        } else
+        if (!mustSignOut) {
+            OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+            if (opr.isDone()) {
+                // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+                // and the GoogleSignInResult will be available instantly.
 
-        {
-            // If the user has not previously signed in on this device or the sign-in has expired,
-            // this asynchronous branch will attempt to sign in the user silently.  Cross-device
-            // single sign-on will occur in this branch.
-            showProgressDialog();
-            opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                @Override
-                public void onResult(GoogleSignInResult googleSignInResult) {
-                    hideProgressDialog();
-                    handleSignInResult(googleSignInResult);
-                }
-            });
+                Log.d(TAG, "Got cached sign-in");
+                GoogleSignInResult result = opr.get();
+                handleSignInResult(result);
+
+            } else
+
+            {
+                // If the user has not previously signed in on this device or the sign-in has expired,
+                // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+                // single sign-on will occur in this branch.
+                showProgressDialog();
+                opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                    @Override
+                    public void onResult(GoogleSignInResult googleSignInResult) {
+                        hideProgressDialog();
+                        handleSignInResult(googleSignInResult);
+                    }
+                });
+            }
         }
-
+        else {
+            mustSignOut = false;
+        }
     }
 
     @Override
@@ -130,7 +139,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                     ParseUser user = new ParseUser();
                     user.setUsername(userName);
                     user.setPassword(firstName);
-                    user.put("display_name",firstName);
+                    user.put("display_name", firstName);
                     user.setEmail(userEmail);
                     user.signUp();
                 } else {
@@ -140,14 +149,9 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            if(!mustSignOut){
+            if (!mustSignOut) {
                 Intent newIntent = new Intent(Login.this, MainActivity.class);
                 startActivity(newIntent);
-                finish();
-            }
-            else {
-                signOut();
-                mustSignOut = false;
             }
         } else {
             // Signed out, show unauthenticated UI.
@@ -157,22 +161,16 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     private void signIn() {
         showProgressDialog();
+        signOut();
         Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
         startActivityForResult(signInIntent, RC_SIGN_IN);
         mProgressDialog.dismiss();
     }
 
     private void signOut() {
-        Auth.GoogleSignInApi.signOut(mGoogleApiClient).setResultCallback(
-                new ResultCallback<Status>() {
-                    @Override
-                    public void onResult(Status status) {
-                        // [START_EXCLUDE]
-                        //do nothing
-                        ParseUser.logOut();
-                        // [END_EXCLUDE]
-                    }
-                });
+        if (mGoogleApiClient.isConnected()) {
+            Auth.GoogleSignInApi.signOut(mGoogleApiClient);
+        }
     }
 
     @Override
@@ -203,7 +201,6 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             case R.id.sign_in_button:
                 signIn();
                 break;
-
         }
     }
 }
