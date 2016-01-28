@@ -183,6 +183,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
             mProgressDialog = new ProgressDialog(this);
             mProgressDialog.setMessage("Loading");
             mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
         }
 
         mProgressDialog.show();

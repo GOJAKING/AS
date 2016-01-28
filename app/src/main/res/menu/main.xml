@@ -2,8 +2,8 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto" >
 
-    <item android:id="@+id/add_activity"
-        android:icon="@drawable/ic_action_add"
-        android:title="@string/title_activity_add"
+    <item android:id="@+id/refresh"
+        android:icon="@drawable/ic_action_refresh"
+        android:title="@string/refresh"
         app:showAsAction="always"/>
 </menu>

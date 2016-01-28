@@ -1,10 +1,7 @@
 package com.autstudent.autschedular;
 
 import android.content.Intent;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
-import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
@@ -13,14 +10,11 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-
-import android.widget.TextView;
 
 public class AddActivity extends AppCompatActivity {
 
@@ -67,10 +61,10 @@ public class AddActivity extends AppCompatActivity {
             public void onTabSelected(TabLayout.Tab tab) {
                 mViewPager.setCurrentItem(tab.getPosition());
                 if(tab.getPosition()==0){
-                    menu.findItem(R.id.add_activity).setVisible(false);
+                    menu.findItem(R.id.add).setVisible(false);
                 }
                 else{
-                    menu.findItem(R.id.add_activity).setVisible(true);
+                    menu.findItem(R.id.add).setVisible(true);
                 }
             }
 
@@ -95,7 +89,7 @@ public class AddActivity extends AppCompatActivity {
                 onBackPressed();
                 finish();
                 return true;
-            case R.id.add_activity:
+            case R.id.add:
                 Intent intent = new Intent(AddActivity.this,PaperDescription.class);
                 startActivity(intent);
                 break;
@@ -106,9 +100,9 @@ public class AddActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.add_class_menu, menu);
         this.menu = menu;
-        menu.findItem(R.id.add_activity).setVisible(false);
+        menu.findItem(R.id.add).setVisible(false);
         return true;
     }
 

@@ -3,22 +3,17 @@ package com.autstudent.autschedular;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.app.ProgressDialog;
-import android.app.TaskStackBuilder;
 import android.app.TimePickerDialog;
-import android.content.ComponentName;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.NavUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.DatePicker;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -44,15 +39,18 @@ import java.util.Locale;
 public class AddSchedule extends AddActivity.PlaceholderFragment {
 
     private TextView titleTV;
-    private TextView dateTV;
+    private TextView startDateTV;
+    private TextView endDateTV;
     private TextView startTimeTV;
     private TextView endTimeTV;
     private TextView reminderTV;
+    private TextView noteTV;
     private EditText EditTextNote;
 
 
     private String title;
-    private String date;
+    private String startDate;
+    private String endDate;
     private String startTime;
     private String endTime;
     private String reminder;
@@ -62,21 +60,22 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.activity_schedule_add, container, false);
-
-        onClickController(rootView);
         titleTV = (TextView) rootView.findViewById(R.id.title_text);
-        dateTV = (TextView) rootView.findViewById(R.id.date_text);
+        startDateTV = (TextView) rootView.findViewById(R.id.start_date_text);
+        endDateTV = (TextView) rootView.findViewById(R.id.end_date_text);
         startTimeTV = (TextView) rootView.findViewById(R.id.start_time_text);
         endTimeTV = (TextView) rootView.findViewById(R.id.end_time_text);
         reminderTV = (TextView) rootView.findViewById(R.id.reminder_text);
         EditTextNote = (EditText) rootView.findViewById(R.id.add_note_edit_text);
+        noteTV = (TextView) rootView.findViewById(R.id.note_text);
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
         Calendar current = Calendar.getInstance();
         Date now = new Date();
         current.setTime(now);
 
-        dateTV.setText(dateFormatter.format(now));
+        startDateTV.setText(dateFormatter.format(now));
+        endDateTV.setText(dateFormatter.format(now));
         startTimeTV.setText(timeFormatter.format(now));
         now.setHours(now.getHours() + 1);
         endTimeTV.setText(timeFormatter.format(now));
@@ -86,7 +85,8 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
             @Override
             public void onClick(View v) {
                 title = titleTV.getText().toString();
-                date = dateTV.getText().toString();
+                startDate = startDateTV.getText().toString();
+                endDate = endDateTV.getText().toString();
                 startTime =  startTimeTV.getText().toString();
                 endTime = endTimeTV.getText().toString();
                 reminder = reminderTV.getText().toString();
@@ -95,6 +95,14 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
                 si.execute();
             }
         });
+
+        setOnClickTitleEditor(titleTV);
+        setOnClickDatePicker(startDateTV);
+        setOnClickDatePicker(endDateTV);
+        setOnClickTimePickerEditor(startTimeTV, endTimeTV);
+        setOnClickReminderPicker(reminderTV, rootView);
+        setOnClickNote(noteTV);
+
         return rootView;
     }
 
@@ -110,7 +118,8 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         protected Void doInBackground(Void... params) {
             ParseObject ob = new ParseObject(DatabaseTitle.TABLESCHEDULENAME);
             ob.put("Title", title);
-            ob.put("Date", date);
+            ob.put("StartDate", startDate);
+            ob.put("EndDate", endDate);
             ob.put("StartTime", startTime);
             ob.put("EndTime", endTime);
             ob.put("Reminder", reminder);
@@ -144,20 +153,17 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         }
     }
 
-    public void onClickController(View rootView) {
-        TextView editTitle = (TextView) rootView.findViewById(R.id.title_text);
-        TextView editDate = (TextView) rootView.findViewById(R.id.date_text);
-        TextView editStartTime = (TextView) rootView.findViewById(R.id.start_time_text);
-        TextView editEndTime = (TextView) rootView.findViewById(R.id.end_time_text);
-        TextView editReminder = (TextView) rootView.findViewById(R.id.reminder_text);
-
-        setOnClickTitleEditor(editTitle);
-        setOnClickDatePicker(editDate);
-        setOnClickTimePickerEditor(editStartTime, editEndTime);
-        setOnClickReminderPicker(editReminder, rootView);
+    public void setOnClickNote(final TextView editNote) {
+        editNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditTextNote.setVisibility(View.VISIBLE);
+                noteTV.setVisibility(View.GONE);
+            }
+        });
     }
 
-    public void setOnClickDatePicker(TextView editDate) {
+    public void setOnClickDatePicker(final TextView editDate) {
         editDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -168,7 +174,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
                     public void onDateSet(DatePicker view, int year, int monthOfYear, int dayOfMonth) {
                         Calendar newDate = Calendar.getInstance();
                         newDate.set(year, monthOfYear, dayOfMonth);
-                        dateTV.setText(dateFormatter.format(newDate.getTime()));
+                        editDate.setText(dateFormatter.format(newDate.getTime()));
                     }
 
                 }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));

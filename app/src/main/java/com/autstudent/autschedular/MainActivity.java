@@ -4,9 +4,11 @@ import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.graphics.RectF;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.View;
@@ -25,8 +27,6 @@ import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
-import com.autstudent.autschedular.Helper.DatabaseTitle;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
@@ -108,13 +108,24 @@ public class MainActivity extends AppCompatActivity
         // the week view. This is optional.
         setupDateTimeInterpreter(false);
 
-        goToTodayView();
+        setUp();
+
         mWeekView.setShowNowLine(true);
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this, AddActivity.class);
+                startActivity(intent);
+            }
+        });
     }
 
     //use this when enter the program
-    public void goToTodayView() {
+    public void setUp() {
         mWeekView.goToToday();
+
         mWeekViewType = TYPE_DAY_VIEW;
         mWeekView.setNumberOfVisibleDays(1);
         Calendar c = Calendar.getInstance();
@@ -124,7 +135,6 @@ public class MainActivity extends AppCompatActivity
         mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
         mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
         mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
-
     }
 
     @Override
@@ -153,9 +163,10 @@ public class MainActivity extends AppCompatActivity
 
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         switch (id) {
-            case R.id.add_activity:
-                Intent intent = new Intent(this, AddActivity.class);
-                startActivity(intent);
+            case R.id.refresh:
+                events = new ArrayList<>();
+                GetCalendarResources gt = new GetCalendarResources();
+                gt.execute();
                 break;
         }
 
@@ -171,6 +182,8 @@ public class MainActivity extends AppCompatActivity
         switch (id) {
             case R.id.nav_today:
                 mWeekView.goToToday();
+                break;
+            case R.id.nav_one:
                 if (mWeekViewType != TYPE_DAY_VIEW) {
                     item.setChecked(!item.isChecked());
                     mWeekViewType = TYPE_DAY_VIEW;
@@ -194,8 +207,8 @@ public class MainActivity extends AppCompatActivity
 
                     // Lets change some dimensions to best fit the view.
                     mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
-                    mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, getResources().getDisplayMetrics()));
-                    mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 10, getResources().getDisplayMetrics()));
+                    mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
+                    mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
                 }
                 break;
             case R.id.nav_three:
@@ -260,7 +273,6 @@ public class MainActivity extends AppCompatActivity
     public List<WeekViewEvent> onMonthChange(int newYear, int newMonth) {
         List<WeekViewEvent> events = new ArrayList<>();
         for (WeekViewEvent we : this.events) {
-            //if(we.getId()>10000)
             if (checkEvent(we, newYear, newMonth)) {
                 events.add(we);
             }
@@ -279,39 +291,11 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onEventClick(WeekViewEvent event, RectF eventRect) {
-        int dayInt = 0;
         Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
         intent.putExtra("id_ref", (int) event.getId());
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
-        intent.putExtra("start_time_class", timeFormatter.format(event.getStartTime().getTime()));
-        intent.putExtra("end_time_class", timeFormatter.format(event.getEndTime().getTime()));
-
-
-        String dayNumber = String.valueOf(event.getStartTime().getTime()).substring(0, 3);
-        switch (dayNumber) {
-            case "Mon":
-                dayInt = 1;
-                break;
-            case "Tue":
-                dayInt = 2;
-                break;
-            case "Wed":
-                dayInt = 3;
-                break;
-            case "Thu":
-                dayInt = 4;
-                break;
-            case "Fri":
-                dayInt = 5;
-                break;
-            case "Sat":
-                dayInt = 6;
-                break;
-            case "Sun":
-                dayInt = 7;
-                break;
-        }
-        intent.putExtra("day_class", dayInt + "");
+        intent.putExtra("start_time", timeFormatter.format(event.getStartTime().getTime()));
+        intent.putExtra("end_time", timeFormatter.format(event.getEndTime().getTime()));
 
         startActivity(intent);
 
@@ -376,8 +360,9 @@ public class MainActivity extends AppCompatActivity
     private void showProgressDialog() {
         if (mProgressDialog == null) {
             mProgressDialog = new ProgressDialog(this);
-            mProgressDialog.setMessage("Loading");
+            mProgressDialog.setMessage("Refreshing Timetable");
             mProgressDialog.setIndeterminate(true);
+            mProgressDialog.setCancelable(false);
         }
 
         mProgressDialog.show();
@@ -414,30 +399,47 @@ public class MainActivity extends AppCompatActivity
             // Populate the week view with some events.
             for (ParseObject ob : schedule) {
                 String[] start = ob.get("StartTime").toString().split(":");
-                Calendar calendar = Calendar.getInstance();
+                Calendar startCalendar = Calendar.getInstance();
                 try {
                     SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
-                    Date date = format.parse(ob.get("Date").toString());
-                    calendar.setTime(date);
+                    Date date = format.parse(ob.get("StartDate").toString());
+                    startCalendar.setTime(date);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
 
-                int month = calendar.get(Calendar.MONTH);
-                int year = calendar.get(Calendar.YEAR);
+                int startMonth = startCalendar.get(Calendar.MONTH);
+                int startYear = startCalendar.get(Calendar.YEAR);
                 String title = ob.get("Title").toString();
                 int id = Integer.parseInt(ob.get("idRef").toString());
 
                 Calendar startTime = Calendar.getInstance();
                 startTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(start[0]));
                 startTime.set(Calendar.MINUTE, Integer.parseInt(start[1]));
-                startTime.set(Calendar.DAY_OF_MONTH, calendar.get(Calendar.DAY_OF_MONTH));
-                startTime.set(Calendar.MONTH, month);
-                startTime.set(Calendar.YEAR, year);
+                startTime.set(Calendar.DAY_OF_MONTH, startCalendar.get(Calendar.DAY_OF_MONTH));
+                startTime.set(Calendar.MONTH, startMonth);
+                startTime.set(Calendar.YEAR, startYear);
+
+                Calendar endCalendar = Calendar.getInstance();
+                try {
+                    SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
+                    Date date = format.parse(ob.get("EndDate").toString());
+                    endCalendar.setTime(date);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                int endMonth = endCalendar.get(Calendar.MONTH);
+                int endYear = endCalendar.get(Calendar.YEAR);
+
                 String[] end = ob.get("EndTime").toString().split(":");
-                Calendar endTime = (Calendar) startTime.clone();
+                Calendar endTime = Calendar.getInstance();
                 endTime.set(Calendar.HOUR_OF_DAY, Integer.parseInt(end[0]));
                 endTime.set(Calendar.MINUTE, Integer.parseInt(end[1]));
+                endTime.set(Calendar.DAY_OF_MONTH, endCalendar.get(Calendar.DAY_OF_MONTH));
+                endTime.set(Calendar.MONTH, endMonth);
+                endTime.set(Calendar.YEAR, endYear);
+
                 WeekViewEvent event = new WeekViewEvent(id, getEventTitle(startTime, title), startTime, endTime);
                 int[] androidColors = getResources().getIntArray(R.array.androidcolors);
                 int randomAndroidColor = androidColors[new Random().nextInt(androidColors.length)];
@@ -445,11 +447,11 @@ public class MainActivity extends AppCompatActivity
                 events.add(event);
             }
 
-            ParseRelation<ParseObject> classelation = parseUser.getRelation("Class");
-            ParseQuery<ParseObject> classquery = classelation.getQuery();
+            ParseRelation<ParseObject> classRelation = parseUser.getRelation("Class");
+            ParseQuery<ParseObject> classQuery = classRelation.getQuery();
             List<ParseObject> classes = new ArrayList<>();
             try {
-                classes = classquery.find();
+                classes = classQuery.find();
             } catch (ParseException e) {
                 e.printStackTrace();
             }
@@ -520,6 +522,17 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(aVoid);
             mWeekView.notifyDatasetChanged();
             hideProgressDialog();
+            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                mWeekViewType = TYPE_WEEK_VIEW;
+                mWeekView.setNumberOfVisibleDays(7);
+                Calendar c = Calendar.getInstance();
+                mWeekView.goToHour(c.get(Calendar.HOUR_OF_DAY));
+
+                // Lets change some dimensions to best fit the view.
+                mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
+                mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
+                mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
+            }
         }
     }
 }

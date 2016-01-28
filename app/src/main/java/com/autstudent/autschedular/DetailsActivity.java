@@ -18,18 +18,14 @@ import com.parse.ParseQuery;
 
 public class DetailsActivity extends AppCompatActivity {
     private ParseObject ob;
-    private ParseObject ob2;
 
     //Strings for Details Activity
     private String title = "";
+    private String subtitle = "paper code : ";
     private String startTime = "";
     private String endTime = "";
     private String note = "";
     private String date = "";
-
-    private String paperCodeString = "";
-
-
 
     final static String REMINDER_MESSAGE = "MINUTES BEFORE EVENT";
     String a = "";
@@ -58,22 +54,17 @@ public class DetailsActivity extends AppCompatActivity {
                 endTime = ob.get("EndTime").toString();
                 startTime = ob.get("StartTime").toString();
                 title = ob.get("Title").toString();
-                date = ob.get("Date").toString();
+                date = ob.get("StartDate").toString();
+                subtitle = "";
             } else {
                 //checking for if is class event
-                ParseQuery<ParseObject> query = new ParseQuery<ParseObject>(DatabaseTitle.TABLECLASSNAME);
-                query.whereEqualTo("idRef", idRef);
+                ParseQuery<ParseObject> query = new ParseQuery<ParseObject>("class");
+                query.whereEqualTo("ClassID", idRef+"");
                 ob = query.find().get(0);
 
-                ParseQuery<ParseObject> classQuery = new ParseQuery<ParseObject>("Paper");
-                //paper code
-
-                //Change Prim Val For Text Views
-                endTime = getIntent().getStringExtra("start_time_class");
-                startTime = getIntent().getStringExtra("start_time_class");
-                title = ob.get("Title").toString();
-                date = ob.get("Date").toString();
-
+                ParseObject paper = ob.getParseObject("paper");
+                title = paper.get("paper_title").toString();
+                subtitle += paper.get("paper_code").toString();
 
             }
 
@@ -83,33 +74,35 @@ public class DetailsActivity extends AppCompatActivity {
         if (ob != null) {
             Log.i("title", title + "");
 
-            TextView titleTv = (TextView) findViewById(R.id.detail_title);
-            titleTv.setText(title);
+//            TextView titleTv = (TextView) findViewById(R.id.detail_title);
+//            titleTv.setText(title);
+//
+//            TextView subTitleTv = (TextView) findViewById(R.id.detail_subtitle);
+//            subTitleTv.setText(subtitle);
+//
+//            TextView dateTv = (TextView) findViewById(R.id.date_text);
+//            dateTv.setText(date);
+//
+//            TextView StartTimeTv = (TextView) findViewById(R.id.start_time_text);
+//            StartTimeTv.setText(startTime);
+//
+//            TextView EndTimeTv = (TextView) findViewById(R.id.end_time_text);
+//            EndTimeTv.setText(endTime);
+//
+//            TextView ReminderTv = (TextView) findViewById(R.id.reminder_text);
+////            TextView NoteTv = (TextView) findViewById(R.id.detail_title);
+//
+//            EditText noteEv = (EditText) findViewById(R.id.details_note);
+//            noteEv.setText(note);
 
-            TextView dateTv = (TextView) findViewById(R.id.date_text);
-            dateTv.setText(date);
-
-
-            TextView StartTimeTv = (TextView) findViewById(R.id.start_time_text);
-            StartTimeTv.setText(startTime);
-
-            TextView EndTimeTv = (TextView) findViewById(R.id.end_time_text);
-            EndTimeTv.setText(endTime);
-
-            TextView ReminderTv = (TextView) findViewById(R.id.reminder_text);
-            TextView NoteTv = (TextView) findViewById(R.id.detail_title);
-
-            EditText noteEv = (EditText) findViewById(R.id.details_note);
-            noteEv.setText(note);
-
-            FloatingActionButton editFAB = (FloatingActionButton) findViewById(R.id.details_activity_edit_button);
-            editFAB.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    View detailsView = findViewById(R.id.details_view);
-                    detailsView.setVisibility(View.GONE);
-                }
-            });
+//            FloatingActionButton editFAB = (FloatingActionButton) findViewById(R.id.details_activity_edit_button);
+//            editFAB.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    View detailsView = findViewById(R.id.details_view);
+//                    detailsView.setVisibility(View.GONE);
+//                }
+//            });
         }
     }
 
