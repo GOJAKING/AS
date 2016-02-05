@@ -1,8 +1,13 @@
 package com.autstudent.autschedular;
 
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
@@ -74,34 +79,46 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
 
     public void onStart() {
         super.onStart();
-        if (!mustSignOut) {
-            OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
-            if (opr.isDone()) {
-                // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
-                // and the GoogleSignInResult will be available instantly.
+        if (isNetworkAvailable()) {
+            if (!mustSignOut) {
+                OptionalPendingResult<GoogleSignInResult> opr = Auth.GoogleSignInApi.silentSignIn(mGoogleApiClient);
+                if (opr.isDone()) {
+                    // If the user's cached credentials are valid, the OptionalPendingResult will be "done"
+                    // and the GoogleSignInResult will be available instantly.
 
-                Log.d(TAG, "Got cached sign-in");
-                GoogleSignInResult result = opr.get();
-                handleSignInResult(result);
+                    Log.d(TAG, "Got cached sign-in");
+                    GoogleSignInResult result = opr.get();
+                    handleSignInResult(result);
 
-            } else
+                } else
 
-            {
-                // If the user has not previously signed in on this device or the sign-in has expired,
-                // this asynchronous branch will attempt to sign in the user silently.  Cross-device
-                // single sign-on will occur in this branch.
-                showProgressDialog();
-                opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
-                    @Override
-                    public void onResult(GoogleSignInResult googleSignInResult) {
-                        hideProgressDialog();
-                        handleSignInResult(googleSignInResult);
-                    }
-                });
+                {
+                    // If the user has not previously signed in on this device or the sign-in has expired,
+                    // this asynchronous branch will attempt to sign in the user silently.  Cross-device
+                    // single sign-on will occur in this branch.
+                    showProgressDialog();
+                    opr.setResultCallback(new ResultCallback<GoogleSignInResult>() {
+                        @Override
+                        public void onResult(GoogleSignInResult googleSignInResult) {
+                            hideProgressDialog();
+                            handleSignInResult(googleSignInResult);
+                        }
+                    });
+                }
+            } else {
+                mustSignOut = false;
             }
-        }
-        else {
-            mustSignOut = false;
+        } else {
+            new AlertDialog.Builder(this)
+                    .setTitle("Network Issue")
+                    .setMessage("Please connect to Intenet")
+                    .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // continue with delete
+                        }
+                    })
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
     }
 
@@ -146,6 +163,7 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
                     Log.d("user", " exists already ");
                 }
                 ParseUser.logIn(userName, firstName);
+                ParseUser.getCurrentUser().put("profile_pic",acct.getPhotoUrl().toString());
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -200,8 +218,28 @@ public class Login extends AppCompatActivity implements GoogleApiClient.OnConnec
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.sign_in_button:
-                signIn();
+                if (isNetworkAvailable())
+                    signIn();
+                else {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Network Issue")
+                            .setMessage("Please connect to Intenet")
+                            .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // continue with delete
+                                }
+                            })
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
                 break;
         }
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
     }
 }

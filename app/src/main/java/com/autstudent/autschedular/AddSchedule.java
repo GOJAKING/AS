@@ -45,6 +45,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
     private TextView endTimeTV;
     private TextView reminderTV;
     private TextView noteTV;
+    private EditText EditTitle;
     private EditText EditTextNote;
 
 
@@ -67,6 +68,7 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         endTimeTV = (TextView) rootView.findViewById(R.id.end_time_text);
         reminderTV = (TextView) rootView.findViewById(R.id.reminder_text);
         EditTextNote = (EditText) rootView.findViewById(R.id.add_note_edit_text);
+        EditTitle = (EditText) rootView.findViewById(R.id.title_edit_text);
         noteTV = (TextView) rootView.findViewById(R.id.note_text);
         SimpleDateFormat dateFormatter = new SimpleDateFormat("dd-MM-yyyy", Locale.US);
         SimpleDateFormat timeFormatter = new SimpleDateFormat("HH:mm", Locale.US);
@@ -84,7 +86,12 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                title = titleTV.getText().toString();
+                if(EditTitle.getText().length()==0) {
+                    title = titleTV.getText().toString();
+                }
+                else {
+                    title = EditTitle.getText().toString();
+                }
                 startDate = startDateTV.getText().toString();
                 endDate = endDateTV.getText().toString();
                 startTime =  startTimeTV.getText().toString();
@@ -96,12 +103,12 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
             }
         });
 
-        setOnClickTitleEditor(titleTV);
         setOnClickDatePicker(startDateTV);
         setOnClickDatePicker(endDateTV);
         setOnClickTimePickerEditor(startTimeTV, endTimeTV);
         setOnClickReminderPicker(reminderTV, rootView);
         setOnClickNote(noteTV);
+        setOnTitleNote(titleTV);
 
         return rootView;
     }
@@ -153,6 +160,16 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
         }
     }
 
+    public void setOnTitleNote(final TextView editNote) {
+        editNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditTitle.setVisibility(View.VISIBLE);
+                titleTV.setVisibility(View.GONE);
+            }
+        });
+    }
+
     public void setOnClickNote(final TextView editNote) {
         editNote.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -180,40 +197,6 @@ public class AddSchedule extends AddActivity.PlaceholderFragment {
                 }, newCalendar.get(Calendar.YEAR), newCalendar.get(Calendar.MONTH), newCalendar.get(Calendar.DAY_OF_MONTH));
                 datePickerDialog.show();
 
-            }
-        });
-    }
-
-    public void setOnClickTitleEditor(TextView editTitle) {
-        editTitle.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-                alertDialog.setTitle("Title");
-                alertDialog.setMessage("Enter title");
-
-                final EditText input = new EditText(getActivity());
-                LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.MATCH_PARENT);
-                input.setLayoutParams(lp);
-                alertDialog.setView(input);
-
-                alertDialog.setPositiveButton("submit",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                titleTV.setText(input.getText());
-                            }
-                        });
-
-                alertDialog.setNegativeButton("cancel",
-                        new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                dialog.cancel();
-                            }
-                        });
-
-                alertDialog.show();
             }
         });
     }

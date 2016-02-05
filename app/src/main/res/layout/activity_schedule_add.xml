@@ -3,8 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
-    tools:context=".Repeat">
+    android:fitsSystemWindows="true">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -40,7 +39,7 @@
 
                     <LinearLayout
                         android:id="@+id/title_texts"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_toRightOf="@+id/title_icon"
                         android:orientation="vertical">
@@ -52,7 +51,19 @@
                             android:textSize="@dimen/font_edit_large"
                             android:textStyle="bold" />
 
+                        <EditText
+                            android:visibility="gone"
+                            android:id="@+id/title_edit_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Add Title..."
+                            android:background="@null"
+                            android:maxLines="1"
+                            android:singleLine="true"
+                            android:textSize="@dimen/font_edit_small" />
+
                         <TextView
+                            android:visibility="visible"
                             android:id="@+id/title_text"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -232,6 +243,10 @@
                     </LinearLayout>
 
                 </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@android:color/darker_gray" />
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -272,20 +287,14 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Add Note..."
+                            android:background="@null"
+                            android:maxLines="1"
+                            android:singleLine="true"
                             android:textSize="@dimen/font_edit_small" />
 
                     </LinearLayout>
 
                 </RelativeLayout>
-
-                <!--<EditText-->
-                <!--android:id="@+id/add_note_edit_text"-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="50dp"-->
-                <!--android:layout_marginBottom="10dp"-->
-                <!--android:layout_marginTop="17dp"-->
-                <!--android:hint="Add Note..."-->
-                <!--android:textSize="@dimen/font_edit_small" />-->
 
                 <Button
                     android:id="@+id/save_button"
