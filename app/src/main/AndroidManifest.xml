@@ -38,9 +38,10 @@
 
         <activity
             android:name=".MainActivity"
-            android:configChanges="keyboardHidden|orientation"
+            android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar"/>
+
         <activity
             android:name=".Login"
             android:label="@string/app_name"

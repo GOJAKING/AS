@@ -5,7 +5,13 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.BitmapShader;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.graphics.RectF;
+import android.graphics.Shader;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
@@ -20,6 +26,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,12 +34,14 @@ import com.alamkanak.weekview.DateTimeInterpreter;
 import com.alamkanak.weekview.MonthLoader;
 import com.alamkanak.weekview.WeekView;
 import com.alamkanak.weekview.WeekViewEvent;
+import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.ParseRelation;
 import com.parse.ParseUser;
 
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -85,6 +94,41 @@ public class MainActivity extends AppCompatActivity
         userNameTV.setText(currentUser.get("display_name").toString());
         TextView emailAddressTV = (TextView) header.findViewById(R.id.email_drawer);
         emailAddressTV.setText(currentUser.getEmail());
+
+        final ImageView bmImage = (ImageView)header.findViewById(R.id.profileImageView);
+
+        new AsyncTask<String, Void, Bitmap>() {
+
+            protected Bitmap doInBackground(String... urls) {
+                String urldisplay = urls[0];
+                Bitmap mIcon11 = null;
+                try {
+                    InputStream in = new java.net.URL(urldisplay).openStream();
+                    mIcon11 = BitmapFactory.decodeStream(in);
+                } catch (Exception e) {
+                    Log.e("Error", e.getMessage());
+                    e.printStackTrace();
+                }
+                return mIcon11;
+
+            }
+
+            protected void onPostExecute(Bitmap result) {
+                View view = findViewById(R.id.loading_pro);
+                view.setVisibility(View.GONE);
+                bmImage.setVisibility(View.VISIBLE);
+                Bitmap circleBitmap = Bitmap.createBitmap(result.getWidth(), result.getHeight(), Bitmap.Config.ARGB_8888);
+
+                BitmapShader shader = new BitmapShader(result,  Shader.TileMode.CLAMP, Shader.TileMode.CLAMP);
+                Paint paint = new Paint();
+                paint.setShader(shader);
+
+                Canvas c = new Canvas(circleBitmap);
+                c.drawCircle(result.getWidth()/2, result.getHeight()/2, result.getWidth()/2, paint);
+                bmImage.setImageBitmap(circleBitmap);
+            }
+        }.execute(currentUser.get("profile_pic").toString());
+
 
         //list of events
         events = new ArrayList<>();
@@ -298,6 +342,7 @@ public class MainActivity extends AppCompatActivity
         intent.putExtra("end_time", timeFormatter.format(event.getEndTime().getTime()));
 
         startActivity(intent);
+        overridePendingTransition(R.anim.right_slide_in, R.anim.right_slide_out);
 
         Toast.makeText(MainActivity.this, "Clicked " + event.getId(), Toast.LENGTH_SHORT).show();
     }
@@ -374,6 +419,31 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        Calendar c = Calendar.getInstance();
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            mWeekViewType = TYPE_WEEK_VIEW;
+            mWeekView.setNumberOfVisibleDays(7);
+            mWeekView.goToHour(c.get(Calendar.HOUR_OF_DAY));
+
+            // Lets change some dimensions to best fit the view.
+            mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
+            mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
+            mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            mWeekViewType = TYPE_DAY_VIEW;
+            mWeekView.setNumberOfVisibleDays(1);
+            mWeekView.goToHour(c.get(Calendar.HOUR_OF_DAY));
+
+            // Lets change some dimensions to best fit the view.
+            mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 8, getResources().getDisplayMetrics()));
+            mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
+            mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 12, getResources().getDisplayMetrics()));
+        }
+    }
 
     private class GetCalendarResources extends AsyncTask<Void, Void, Void> {
 
@@ -522,17 +592,6 @@ public class MainActivity extends AppCompatActivity
             super.onPostExecute(aVoid);
             mWeekView.notifyDatasetChanged();
             hideProgressDialog();
-            if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
-                mWeekViewType = TYPE_WEEK_VIEW;
-                mWeekView.setNumberOfVisibleDays(7);
-                Calendar c = Calendar.getInstance();
-                mWeekView.goToHour(c.get(Calendar.HOUR_OF_DAY));
-
-                // Lets change some dimensions to best fit the view.
-                mWeekView.setColumnGap((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 2, getResources().getDisplayMetrics()));
-                mWeekView.setTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
-                mWeekView.setEventTextSize((int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, 9, getResources().getDisplayMetrics()));
-            }
         }
     }
 }

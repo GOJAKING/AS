@@ -5,11 +5,11 @@
         <item
             android:id="@+id/nav_today"
             android:icon="@drawable/ic_calender_today"
-            android:title="@string/today_schedule" />
+            android:title="@string/go_to_today" />
         <item
             android:id="@+id/nav_one"
-            android:icon="@drawable/ic_calender_today"
-            android:title="@string/today_schedule" />
+            android:icon="@drawable/ic_action_one_day"
+            android:title="@string/one_day_s_schedule" />
         <item
             android:id="@+id/nav_three"
             android:icon="@drawable/ic_calender_week"
