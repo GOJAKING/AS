@@ -52,15 +52,15 @@
                     android:layout_weight="0.05"
                     android:id="@+id/leftSideLinear"
                     android:orientation="horizontal" />
-
+                <!--Edit View-->
                 <LinearLayout
-                    android:id="@+id/details_edit"
+                    android:id="@+id/edit_view"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_marginTop="@dimen/app_bar_height"
                     android:layout_weight="0.8"
                     android:orientation="vertical"
-                    android:visibility="gone">
+                    android:visibility="visible">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -142,25 +142,26 @@
                             style="?android:attr/borderlessButtonStyle"
                             android:textSize="@dimen/font_edit_small_small"
                             android:textAlignment="center"
-                            android:layout_below="@+id/date_icon_editver"
-                            android:layout_alignParentRight="true"
-                            android:layout_alignParentEnd="true"
-                            android:textColor="#FF808080" />
+                            android:textColor="#FF808080"
+                            android:layout_toRightOf="@+id/editDateStart"
+                            android:layout_toEndOf="@+id/editDateStart"
+                            android:layout_above="@+id/editDateEnd"
+                            android:layout_alignTop="@+id/editDateStart"
+                            android:layout_marginTop="-5dp"/>
 
                         <Button
                             android:id="@+id/editDateStart"
-                            android:layout_width="60dp"
+                            android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/date_sentence"
+                            android:text="@string/startDate_sentence"
                             style="?android:attr/borderlessButtonStyle"
                             android:textSize="@dimen/font_edit_small_small"
                             android:textAlignment="textStart"
-                            android:layout_toLeftOf="@+id/start_time_text_editver"
-                            android:layout_alignTop="@+id/start_time_text_editver"
+                            android:textColor="#FF808080"
+                            android:layout_below="@+id/date_icon_editver"
                             android:layout_alignLeft="@+id/date_texts_editver"
                             android:layout_alignStart="@+id/date_texts_editver"
-                            android:layout_above="@+id/editDateEnd"
-                            android:textColor="#FF808080" />
+                            android:layout_marginTop="-5dp"/>
 
                         <Button
                             android:layout_width="wrap_content"
@@ -168,16 +169,14 @@
                             android:id="@+id/editDateEnd"
                             style="?android:attr/borderlessButtonStyle"
                             android:allowUndo="false"
-                            android:text="@string/date_sentence"
+                            android:text="@string/endDate_sentence"
                             android:textSize="@dimen/font_edit_small_small"
-                            android:layout_alignLeft="@+id/editDateStart"
-                            android:layout_alignStart="@+id/editDateStart"
-                            android:layout_toStartOf="@+id/start_time_text_editver"
-                            android:layout_below="@+id/start_time_text_editver"
-                            android:layout_alignBottom="@+id/end_time_text_editver"
                             android:textAlignment="textStart"
-                            android:layout_toLeftOf="@+id/start_time_text_editver"
-                            android:textColor="#FF808080" />
+                            android:textColor="#FF808080"
+                            android:layout_below="@+id/editDateStart"
+                            android:layout_toRightOf="@+id/date_icon_editver"
+                            android:layout_toEndOf="@+id/date_icon_editver"
+                            android:layout_marginTop="-10dp"/>
 
                         <Button
                             android:id="@+id/end_time_text_editver"
@@ -189,10 +188,12 @@
                             style="?android:attr/borderlessButtonStyle"
                             android:layout_gravity="right"
                             android:textAlignment="center"
-                            android:layout_below="@+id/start_time_text_editver"
                             android:layout_toRightOf="@+id/editDateStart"
                             android:layout_alignRight="@+id/start_time_text_editver"
-                            android:layout_alignEnd="@+id/start_time_text_editver" />
+                            android:layout_alignEnd="@+id/start_time_text_editver"
+                            android:layout_alignBottom="@+id/editDateEnd"
+                            android:layout_below="@+id/editDateStart"
+                            android:layout_marginTop="-10dp"/>
 
                     </RelativeLayout>
 
@@ -205,7 +206,8 @@
 
                     <RelativeLayout
                         android:layout_width="match_parent"
-                        android:layout_height="82dp">
+                        android:layout_height="82dp"
+                        android:visibility="visible">
 
                         <ImageView
                             android:id="@+id/reminder_icon_editver"
@@ -222,7 +224,6 @@
                             android:id="@+id/reminder_texts_editver"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-
                             android:layout_toRightOf="@+id/reminder_icon_editver"
                             android:orientation="vertical">
 
@@ -255,16 +256,54 @@
 
                     </RelativeLayout>
 
-                    <EditText
-                        android:id="@+id/details_note_editver"
+                    <View
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginLeft="5dp"
-                        android:layout_marginTop="20dp"
-                        android:hint="Notes to Remember..."
-                        android:textSize="@dimen/font_edit_small_small" />
+                        android:layout_height="1dp"
+                        android:layout_marginBottom="16dp"
+                        android:layout_marginTop="16dp"
+                        android:background="@color/light_gray" />
 
-                </LinearLayout>
+                    <RelativeLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content">
+                    <ImageView
+                        android:id="@+id/date_icon_editver_1"
+                        android:layout_width="@dimen/icon_edit_large"
+                        android:layout_height="@dimen/icon_edit_large"
+                        android:layout_marginLeft="4dp"
+                        android:layout_marginRight="10dp"
+                        android:src="@drawable/ic_action_calendar"
+                        android:tint="@color/colorBlack"
+                        android:contentDescription="dateIcon" />
+                        <TextView
+                            android:layout_width="168dp"
+                            android:layout_height="wrap_content"
+                            android:text="NOTES:"
+                            android:id="@+id/textView"
+                            android:layout_alignParentTop="true"
+                            android:layout_marginTop="10dp"
+                            android:layout_marginLeft="10dp"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="@dimen/font_edit_med_small"
+                            android:layout_toRightOf="@+id/date_icon_editver_1"
+                            android:layout_toEndOf="@+id/date_icon_editver_1"
+                            android:layout_alignBottom="@+id/date_icon_editver_1" />
+
+                        <EditText
+                            android:id="@+id/details_note_editver"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="-10dp"
+                            android:hint="Notes to Remember..."
+                            android:textSize="@dimen/font_edit_small_small"
+                            android:layout_below="@+id/textView"
+                            android:layout_alignLeft="@+id/textView"
+                            android:layout_alignStart="@+id/textView" />
+                    </RelativeLayout>
+
+
+
+                </LinearLayout> //EDIT VIEW ----------------------------------------------------
 
                 <LinearLayout
                     android:id="@+id/details_view"
@@ -273,7 +312,7 @@
                     android:layout_marginTop="@dimen/app_bar_height"
                     android:layout_weight="0.8"
                     android:orientation="vertical"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -337,13 +376,26 @@
                                 android:textSize="@dimen/font_edit_med_small" />
 
                             <TextView
-                                android:id="@+id/date_text"
+                                android:id="@+id/startDate_text"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="@string/date_sentence"
+                                android:text="@string/startDate_sentence"
                                 android:textColor="@color/colorBlack"
                                 android:textSize="@dimen/font_edit_small_small" />
+
                         </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/toEndDate_text"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/endDate_sentence"
+                            android:textColor="@color/colorBlack"
+                            android:textSize="@dimen/font_edit_small_small"
+                            android:layout_alignBottom="@+id/date_texts"
+                            android:layout_toRightOf="@+id/date_texts"
+                            android:layout_toEndOf="@+id/date_texts" />
+
 
                     </RelativeLayout>
 
@@ -450,7 +502,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="REMINDER:"
                                 android:textColor="@color/colorBlack"
-                                android:textSize="@dimen/font_edit_large" />
+                                android:textSize="@dimen/font_edit_med_small" />
 
                             <LinearLayout
                                 android:layout_width="wrap_content"
@@ -489,7 +541,7 @@
                         android:hint="Notes to Remember..."
                         android:textSize="@dimen/font_edit_small_small" />
 
-                </LinearLayout>
+                </LinearLayout> //DETAILS VIEW---------------------------------------------------
 
                 <LinearLayout
                     android:layout_width="0dip"
@@ -509,7 +561,7 @@
 
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fab"
+        android:id="@+id/details_edit_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_margin="@dimen/fab_margin"

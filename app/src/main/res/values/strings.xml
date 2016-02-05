@@ -33,7 +33,8 @@
     <string name="three_day_schedule">Three Day\'s schedule</string>
 
     <string name="paper_details_title">PAPER DETAILS:</string>
-    <string name="date_sentence">THURSDAY 19th OCTOBER</string>
+    <string name="startDate_sentence">THU 19 OCT</string>
+    <string name="endDate_sentence">FRI 20 OCT</string>
     <string name="paper_subtitle">Paper Code: INFS6047</string>
     <string name="title_activity_options">optionsActivity</string>
     <string name="refresh">refresh calender</string>
