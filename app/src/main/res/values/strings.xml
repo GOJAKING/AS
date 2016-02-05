@@ -39,5 +39,7 @@
     <string name="title_activity_options">optionsActivity</string>
     <string name="refresh">refresh calender</string>
     <string name="one_day_s_schedule">One Day\'s Schedule</string>
+    <string name="startDate_sentence">THU 19 OCT</string>
+    <string name="endDate_sentence">FRI 20 OCT</string>
 
 </resources>
