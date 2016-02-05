@@ -272,7 +272,7 @@
                             android:layout_height="@dimen/icon_edit_large"
                             android:layout_marginLeft="4dp"
                             android:layout_marginRight="10dp"
-                            android:src="@drawable/ic_action_calendar"
+                            android:src="@drawable/ic_action_pencil"
                             android:tint="@color/colorBlack"
                             android:contentDescription="dateIcon" />
                         <TextView
