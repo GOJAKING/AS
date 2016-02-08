@@ -532,11 +532,13 @@
 
                     </RelativeLayout>
 
-                    <EditText
+
+
+                    <TextView
                         android:id="@+id/details_note"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
-                        android:layout_marginLeft="5dp"
+                        android:layout_marginLeft="30dp"
                         android:layout_marginTop="20dp"
                         android:hint="Notes to Remember..."
                         android:textSize="@dimen/font_edit_small_small" />

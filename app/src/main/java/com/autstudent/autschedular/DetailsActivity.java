@@ -129,6 +129,10 @@ public class DetailsActivity extends AppCompatActivity {
 //            TextView subTitleTv = (TextView) findViewById(R.id.detail_subtitle);
 //            subTitleTv.setText(subtitle);
 
+            /**
+             * Details View setting buttons and textviews
+             */
+
             TextView startDateTv = (TextView) findViewById(R.id.startDate_text);
             startDateTv.setText(startDate);
 
@@ -146,7 +150,7 @@ public class DetailsActivity extends AppCompatActivity {
 
             //TextView NoteTv = (TextView) findViewById(R.id.detail_title);
 
-            EditText noteEv = (EditText) findViewById(R.id.details_note);
+            TextView noteEv = (TextView) findViewById(R.id.details_note);
             noteEv.setText(note);
 
             if(endDate.equals(startDate))
@@ -168,9 +172,6 @@ public class DetailsActivity extends AppCompatActivity {
             });
         }
 
-
-
-
         /**
          * Edit View setting buttons and textviews
          */
@@ -189,7 +190,6 @@ public class DetailsActivity extends AppCompatActivity {
         endTimeButton.setText(endTime);
         reminderButton.setText(reminder + " Minutes before event");
         editNote.setText(note);
-
     }
 
 
